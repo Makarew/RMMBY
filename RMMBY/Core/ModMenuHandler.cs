@@ -486,13 +486,13 @@ namespace RMMBY
         {
             if (currentMenu == 0)
             {
-                if (selectedObject.transform.position.y < 265)
+                if (selectedObject.transform.position.y < buttonYPeak)
                 {
                     Vector3 pos = buttonHolder.transform.position;
                     pos.y += buttonYDif;
                     buttonHolder.transform.position = pos;
                 }
-                else if (selectedObject.transform.position.y > 1045)
+                else if (selectedObject.transform.position.y > buttonYValley)
                 {
                     Vector3 pos = buttonHolder.transform.position;
                     pos.y -= buttonYDif;
@@ -516,11 +516,19 @@ namespace RMMBY
             settingStart.x = float.Parse(dataMulti[0]);
             settingStart.y = float.Parse(dataMulti[1]);
             settingYDif = float.Parse(data);
+
+            data = DataReader.ReadData("ModListSelectionPeak");
+            buttonYPeak = float.Parse(data);
+
+            data = DataReader.ReadData("ModListSelectionValley");
+            buttonYValley = float.Parse(data);
         }
 
         private Vector2 buttonStart;
         private float buttonYDif;
         private float currentY;
+        private float buttonYPeak;
+        private float buttonYValley;
 
         private Vector2 settingStart;
         private float settingYDif;
