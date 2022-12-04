@@ -1,0 +1,11 @@
+RMMBYVariant;RMMBY
+GBOneClick;Enabled
+GBSchema;rmmbyaf
+GBRegDefault;RMMBY Arrowfell
+GBOneClickExe;RMMBYGB.exe
+ModListStartPosition;-850;320
+ModListYDistance;110
+ModListSelectionPeak;265
+ModListSelectionValley;1045
+ModSettingStartPosition;0;195
+ModSettingYDistance;60
