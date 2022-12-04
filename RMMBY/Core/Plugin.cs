@@ -1,6 +1,7 @@
 ﻿using MelonLoader;
 using UnityEngine;
 using RMMBY.Editable;
+using RMMBY.Helpers;
 
 namespace RMMBY
 {
@@ -9,6 +10,13 @@ namespace RMMBY
         private bool inScene;
         private EnabledMods em;
         private InputHandler inputHandler;
+
+        public override void OnInitializeMelon()
+        {
+            base.OnInitializeMelon();
+
+            RegistryHelper.ValidateRegistry();
+        }
 
         public override void OnSceneWasLoaded(int buildIndex, string sceneName)
         {

@@ -6,6 +6,7 @@ using System;
 using System.IO;
 using System.Collections.Generic;
 using MelonLoader;
+using RMMBY.Helpers;
 
 namespace RMMBY
 {
@@ -20,6 +21,7 @@ namespace RMMBY
         {
             inputHandler = FindObjectOfType<Editable.InputHandler>();
             modDirectory = Path.Combine(MelonHandler.ModsDirectory, "RMMBY/Mods");
+            SetVariables();
             LoadMods();
             currentY = buttonStart.y;
             buttonPrefab = GameObject.Find("ButtonPrefab");
@@ -499,12 +501,29 @@ namespace RMMBY
             }
         }
 
-        private Vector2 buttonStart = new Vector2(-850, 320);
-        private float buttonYDif = 110;
+        private void SetVariables()
+        {
+            string[] dataMulti = DataReader.ReadDataMulti("ModListStartPosition");
+            string data = DataReader.ReadData("ModListYDistance");
+
+            buttonStart.x = float.Parse(dataMulti[0]);
+            buttonStart.y = float.Parse(dataMulti[1]);
+            buttonYDif = float.Parse(data);
+
+            dataMulti = DataReader.ReadDataMulti("ModSettingStartPosition");
+            data = DataReader.ReadData("ModSettingYDistance");
+
+            settingStart.x = float.Parse(dataMulti[0]);
+            settingStart.y = float.Parse(dataMulti[1]);
+            settingYDif = float.Parse(data);
+        }
+
+        private Vector2 buttonStart;
+        private float buttonYDif;
         private float currentY;
 
-        private Vector2 settingStart = new Vector2(0, 195);
-        private float settingYDif = 60;
+        private Vector2 settingStart;
+        private float settingYDif;
         private float settingY;
 
         private GameObject settingHolder;

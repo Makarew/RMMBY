@@ -1,6 +1,8 @@
 ﻿using MelonLoader;
+using RMMBY.Helpers;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using UnityEngine;
 
 namespace RMMBY
@@ -20,9 +22,16 @@ namespace RMMBY
 
         private void LoadAllEnabled()
         {
-            for (int i = 0; i < enabledPaths.Count; i++)
+            List<string> paths = enabledPaths;
+            for (int i = 0; i < paths.Count; i++)
             {
-                RegisterMelon(enabledPaths[i]);
+                if (File.Exists(paths[i]))
+                {
+                    RegisterMelon(paths[i]);
+                } else
+                {
+                    RemoveEnabledPath(paths[i]);
+                }
             }
         }
 
@@ -33,32 +42,9 @@ namespace RMMBY
 
         public void GetEnabledPaths()
         {
-            StreamReader r = new StreamReader(path);
-
             enabledPaths.Clear();
 
-            string line;
-            using (r)
-            {
-                do
-                {
-                    //Read a line
-                    line = r.ReadLine();
-                    if (line != null)
-                    {
-                        //Divide line into basic structure
-                        string[] lineData = line.Split(';');
-                        //Check the line type
-                        if (lineData[0] == "enabledmod")
-                        {
-                            enabledPaths.Add(lineData[1]);
-                        }
-                    }
-                }
-                while (line != null);
-                //Stop reading the file
-                r.Close();
-            }
+            enabledPaths = DataReader.ReadDataAll("enabledmod").ToList();
         }
 
         internal void AddNewEnabledPath(string newpath)
