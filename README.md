@@ -1,4 +1,4 @@
-![RMMBYLogo](https://user-images.githubusercontent.com/31836770/203875165-491030b9-1846-49da-884b-862b6acb088e.png)
+![RMMBY Bee Logo](https://user-images.githubusercontent.com/31836770/205555764-641aca01-5b7c-40c4-8db6-e29cfafc9cee.png)
 *Current RMMBY Core Version: 0.6.1*
 
 RMMBY is a Unity Mono mod manager originally designed for RWBY: Arrowfell
