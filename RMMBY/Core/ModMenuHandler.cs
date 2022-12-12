@@ -7,6 +7,8 @@ using System.IO;
 using System.Collections.Generic;
 using MelonLoader;
 using RMMBY.Helpers;
+using System.Diagnostics;
+using System.Windows;
 
 namespace RMMBY
 {
@@ -17,13 +19,27 @@ namespace RMMBY
         private bool right;
         private bool left;
 
+        Canvas modmenu;
+        private float scaleFactor = 1;
+
         public void Start()
         {
             inputHandler = FindObjectOfType<Editable.InputHandler>();
             modDirectory = Path.Combine(MelonHandler.ModsDirectory, "RMMBY/Mods");
             SetVariables();
+
+            float referenceResolution = 0;
+            try
+            {
+                referenceResolution = float.Parse(DataReader.ReadData("ModMenuScreenResolutionReference"));
+            }
+            catch { DataError(); }
+
+            if (error) return;
+
             LoadMods();
             currentY = buttonStart.y;
+            currentX = buttonStart.x;
             buttonPrefab = GameObject.Find("ButtonPrefab");
             buttonHolder = GameObject.Find("Buttons");
             CreateButtons();
@@ -31,14 +47,28 @@ namespace RMMBY
             ToggleMenu(0);
             currentMenu = 0;
             em = FindObjectOfType<EnabledMods>();
+
+            modmenu = GameObject.Find("ModMenu").GetComponent<Canvas>();
+            float screenHeight = Screen.height;
+            scaleFactor = screenHeight / referenceResolution;
+            modmenu.scaleFactor = scaleFactor;
         }
 
         private void Update()
         {
+            if(currentMenu == -1 && inputHandler.back)
+                SceneManager.LoadScene(ListenToLoadMenu.sceneToReturnTo);
+
             if (!modsLoaded) return;
 
             switch (currentMenu)
             {
+                case -1:
+                    if (inputHandler.back || inputHandler.select)
+                    {
+                        SceneManager.LoadScene(ListenToLoadMenu.sceneToReturnTo);
+                    }
+                    break;
                 case 0:
                     CMMods();
                     break;
@@ -52,30 +82,170 @@ namespace RMMBY
 
         private void CMMods()
         {
-            if (inputHandler.down)
+            switch (buttonDir)
             {
-                if (!down)
-                {
-                    currentButtonSelect++;
-                    down = true;
-                }
-            }
-            else
-            {
-                down = false;
-            }
+                case 0:
+                    if (inputHandler.down)
+                    {
+                        if (!down)
+                        {
+                            currentButtonSelect++;
+                            down = true;
+                        }
+                    }
+                    else
+                    {
+                        down = false;
+                    }
 
-            if (inputHandler.up)
-            {
-                if (!up)
-                {
-                    currentButtonSelect--;
-                    up = true;
-                }
-            }
-            else
-            {
-                up = false;
+                    if (inputHandler.up)
+                    {
+                        if (!up)
+                        {
+                            currentButtonSelect--;
+                            up = true;
+                        }
+                    }
+                    else
+                    {
+                        up = false;
+                    }
+                    break;
+                case 2:
+                    if (inputHandler.down || inputHandler.right)
+                    {
+                        if (!down)
+                        {
+                            currentButtonSelect++;
+                            down = true;
+                        }
+                    }
+                    else
+                    {
+                        down = false;
+                    }
+
+                    if (inputHandler.up || inputHandler.left)
+                    {
+                        if (!up)
+                        {
+                            currentButtonSelect--;
+                            up = true;
+                        }
+                    }
+                    else
+                    {
+                        up = false;
+                    }
+                    break;
+                case 3:
+                    if (inputHandler.down || inputHandler.left)
+                    {
+                        if (!down)
+                        {
+                            currentButtonSelect++;
+                            down = true;
+                        }
+                    }
+                    else
+                    {
+                        down = false;
+                    }
+
+                    if (inputHandler.up || inputHandler.right)
+                    {
+                        if (!up)
+                        {
+                            currentButtonSelect--;
+                            up = true;
+                        }
+                    }
+                    else
+                    {
+                        up = false;
+                    }
+                    break;
+                case 1:
+                    if (inputHandler.right)
+                    {
+                        if (!down)
+                        {
+                            currentButtonSelect++;
+                            down = true;
+                        }
+                    }
+                    else
+                    {
+                        down = false;
+                    }
+
+                    if (inputHandler.left)
+                    {
+                        if (!up)
+                        {
+                            currentButtonSelect--;
+                            up = true;
+                        }
+                    }
+                    else
+                    {
+                        up = false;
+                    }
+                    break;
+                case 4:
+                    if (inputHandler.right || inputHandler.down)
+                    {
+                        if (!down)
+                        {
+                            currentButtonSelect++;
+                            down = true;
+                        }
+                    }
+                    else
+                    {
+                        down = false;
+                    }
+
+                    if (inputHandler.left || inputHandler.up)
+                    {
+                        if (!up)
+                        {
+                            currentButtonSelect--;
+                            up = true;
+                        }
+                    }
+                    else
+                    {
+                        up = false;
+                    }
+                    break;
+                case 5:
+                    if (inputHandler.right || inputHandler.up)
+                    {
+                        if (!down)
+                        {
+                            currentButtonSelect++;
+                            down = true;
+                        }
+                    }
+                    else
+                    {
+                        down = false;
+                    }
+
+                    if (inputHandler.left || inputHandler.down)
+                    {
+                        if (!up)
+                        {
+                            currentButtonSelect--;
+                            up = true;
+                        }
+                    }
+                    else
+                    {
+                        up = false;
+                    }
+                    break;
             }
 
             if (currentButtonSelect >= buttons.Count)
@@ -91,7 +261,13 @@ namespace RMMBY
 
             if (inputHandler.back)
             {
-                SceneManager.LoadScene(ListenToLoadMenu.sceneToReturnTo);
+                if (restartRequired) {
+                    Melon<Plugin>.Instance.LoadInfo(restartMessage, 0);
+                }
+                else
+                {
+                    SceneManager.LoadScene(ListenToLoadMenu.sceneToReturnTo);
+                }
             }
 
             if (inputHandler.select && Metadata[currentButtonSelect].State == MetadataState.Success)
@@ -163,6 +339,11 @@ namespace RMMBY
                 else
                 {
                     em.RemoveEnabledPath(Path.Combine(Metadata[currentButtonSelect].Location, Metadata[currentButtonSelect].Modules[0]));
+                    if (Metadata[currentButtonSelect].RequiresRestartToUnload)
+                    {
+                        restartRequired = true;
+                        restartMessage = "Restart required to unload " + Metadata[currentButtonSelect].Title;
+                    }
                 }
 
                 if (Metadata[currentButtonSelect].ConfigFile != "N/A" && currentSettings.Count > 1)
@@ -273,7 +454,7 @@ namespace RMMBY
                 GameObject button = GameObject.Instantiate(buttonPrefab);
                 button.transform.SetParent(buttonHolder.transform);
                 button.transform.SetSiblingIndex(i);
-                button.transform.localPosition = new Vector3(buttonStart.x, currentY, 0);
+                button.transform.localPosition = new Vector3(currentX, currentY, 0);
                 if (i != 0)
                 {
                     button.transform.Find("Highlight").gameObject.SetActive(false);
@@ -285,6 +466,7 @@ namespace RMMBY
                 buttons.Add(button);
 
                 currentY -= buttonYDif;
+                currentX += buttonXDif;
             }
 
             buttonsCreated = true;
@@ -292,6 +474,7 @@ namespace RMMBY
 
         private void GetMenus()
         {
+            menus.Clear();
             menus.Add(GameObject.Find("ModSelectionMenu"));
             menus.Add(GameObject.Find("ModSettingsMenu"));
         }
@@ -315,6 +498,8 @@ namespace RMMBY
 
         private void CreateSettings(string settingsPath, string configPath)
         {
+            modmenu.scaleFactor = 1;
+
             ToggleMenu(1);
 
             settingHolder = GameObject.Find("Settings");
@@ -424,6 +609,8 @@ namespace RMMBY
             }
 
             currentSettingSelect = 0;
+
+            modmenu.scaleFactor = scaleFactor;
         }
 
         private void LoadMods()
@@ -486,16 +673,39 @@ namespace RMMBY
         {
             if (currentMenu == 0)
             {
-                if (selectedObject.transform.position.y < buttonYPeak)
+                float currentPos = 0;
+                float dirMod = 1;
+
+                switch (buttonDir) {
+                    case 1:
+                        currentPos = selectedObject.transform.position.x;
+                        dirMod = -1;
+                        break;
+                    case 4:
+                        currentPos = selectedObject.transform.position.x;
+                        dirMod = -1;
+                        break;
+                    case 5:
+                        currentPos = selectedObject.transform.position.x;
+                        dirMod = -1;
+                        break;
+                    default:
+                        currentPos = selectedObject.transform.position.y;
+                        break;
+                }
+
+                if (currentPos < buttonValley * scaleFactor)
                 {
                     Vector3 pos = buttonHolder.transform.position;
-                    pos.y += buttonYDif;
+                    pos.y += (buttonYDif * scaleFactor * dirMod);
+                    pos.x -= (buttonXDif * scaleFactor * dirMod);
                     buttonHolder.transform.position = pos;
                 }
-                else if (selectedObject.transform.position.y > buttonYValley)
+                else if (currentPos > buttonPeak * scaleFactor)
                 {
                     Vector3 pos = buttonHolder.transform.position;
-                    pos.y -= buttonYDif;
+                    pos.y -= (buttonYDif * scaleFactor * dirMod);
+                    pos.x += (buttonXDif * scaleFactor * dirMod);
                     buttonHolder.transform.position = pos;
                 }
             }
@@ -503,32 +713,121 @@ namespace RMMBY
 
         private void SetVariables()
         {
-            string[] dataMulti = DataReader.ReadDataMulti("ModListStartPosition");
-            string data = DataReader.ReadData("ModListYDistance");
+            try
+            {
+                string[] dataMulti = DataReader.ReadDataMulti("ModListStartPosition");
+                string data = DataReader.ReadData("ModListYDistance");
 
-            buttonStart.x = float.Parse(dataMulti[0]);
-            buttonStart.y = float.Parse(dataMulti[1]);
-            buttonYDif = float.Parse(data);
+                buttonStart.x = float.Parse(dataMulti[0]);
+                buttonStart.y = float.Parse(dataMulti[1]);
+                buttonYDif = float.Parse(data);
 
-            dataMulti = DataReader.ReadDataMulti("ModSettingStartPosition");
-            data = DataReader.ReadData("ModSettingYDistance");
+                data = DataReader.ReadData("ModListXDistance");
 
-            settingStart.x = float.Parse(dataMulti[0]);
-            settingStart.y = float.Parse(dataMulti[1]);
-            settingYDif = float.Parse(data);
+                buttonXDif = float.Parse(data);
 
-            data = DataReader.ReadData("ModListSelectionPeak");
-            buttonYPeak = float.Parse(data);
+                dataMulti = DataReader.ReadDataMulti("ModSettingStartPosition");
+                data = DataReader.ReadData("ModSettingYDistance");
 
-            data = DataReader.ReadData("ModListSelectionValley");
-            buttonYValley = float.Parse(data);
+                settingStart.x = float.Parse(dataMulti[0]);
+                settingStart.y = float.Parse(dataMulti[1]);
+                settingYDif = float.Parse(data);
+
+                data = DataReader.ReadData("ModListSelectionPeak");
+                buttonPeak = float.Parse(data);
+
+                data = DataReader.ReadData("ModListSelectionValley");
+                buttonValley = float.Parse(data);
+
+                data = DataReader.ReadData("ModListDirection");
+                switch (data)
+                {
+                    case "Vertical":
+                        buttonDir = 0;
+                        break;
+                    case "Horizontal":
+                        buttonDir = 1;
+                        break;
+                    default:
+                        float.Parse("Force Error");
+                        break;
+                }
+
+                data = DataReader.ReadData("ModListAltInput");
+                switch (data)
+                {
+                    case "Right":
+                        if(buttonDir == 0)
+                            buttonDir = 2;
+                        else if (buttonDir == 1)
+                            buttonDir = 4;
+                        break;
+                    case "Left":
+                        if (buttonDir == 0)
+                            buttonDir = 3;
+                        else if (buttonDir == 1)
+                            buttonDir = 5;
+                        break;
+                    default:
+                        break;
+                }
+            } catch {
+                DataError();
+            }
         }
 
+        private void DataError()
+        {
+            GetMenus();
+            ToggleMenu(0);
+
+            error = true;
+
+            string data = "";
+
+            try
+            {
+                data = DataReader.ReadData("ModMenuScreenResolutionReference");
+                float.Parse(data);
+            }
+            catch
+            {
+                data = "2160";
+            }
+            modmenu = GameObject.Find("ModMenu").GetComponent<Canvas>();
+            float screenHeight = Screen.height;
+            scaleFactor = screenHeight / float.Parse(data);
+            modmenu.scaleFactor = scaleFactor;
+
+            currentMenu = -1;
+
+            List<Text> texts = new List<Text>();
+            texts.Add(GameObject.Find("ModName").GetComponent<Text>());
+            texts.Add(GameObject.Find("Author").GetComponent<Text>());
+            texts.Add(GameObject.Find("Description").GetComponent<Text>());
+            texts.Add(GameObject.Find("Version").GetComponent<Text>());
+
+            modText = texts.ToArray();
+
+            modText[0].text = "";
+            modText[1].text = "";
+            modText[2].text = "Error Reading Data File." +
+                "\n\nIf you made this version of RMMBY, please check the RMMBY wiki to make sure your data file is filled out correctly." +
+                "\n\nIf you downloaded RMMBY, please reinstall RMMBY. If it still doesn't work, let the creator of this version of RMMBY know that there's an error in the data file.";
+            modText[3].text = "";
+        }
+
+        private bool error;
+
+        private int buttonDir;
+        private bool buttonAltInput;
         private Vector2 buttonStart;
         private float buttonYDif;
+        private float buttonXDif;
         private float currentY;
-        private float buttonYPeak;
-        private float buttonYValley;
+        private float currentX;
+        private float buttonPeak;
+        private float buttonValley;
 
         private Vector2 settingStart;
         private float settingYDif;
@@ -560,8 +859,11 @@ namespace RMMBY
         private string modDirectory;
 
         private List<GameObject> menus = new List<GameObject>();
-        private int currentMenu;
+        private int currentMenu = -1;
 
         private EnabledMods em;
+
+        private bool restartRequired = false;
+        private string restartMessage = "";
     }
 }

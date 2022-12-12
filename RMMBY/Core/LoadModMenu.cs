@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using System.IO;
 using MelonLoader;
@@ -11,22 +10,15 @@ namespace RMMBY
         private static AssetBundle bundle;
         public static string scene;
 
-        private static void GetModMenu()
-        {
-            SceneManager.LoadScene(scene);
-        }
-
-        public static void CheckForBundle()
+        public static void CheckForBundle(string sceneName)
         {
             if (bundle == null)
             {
                 string path = Path.Combine(MelonHandler.ModsDirectory, "RMMBY/rmmby");
                 bundle = AssetBundle.LoadFromFile(path);
-                string[] scenePaths = bundle.GetAllScenePaths();
-                scene = Path.GetFileNameWithoutExtension(scenePaths[0]);
             }
 
-            GetModMenu();
+            SceneManager.LoadScene(sceneName);
         }
     }
 }

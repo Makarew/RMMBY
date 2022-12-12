@@ -13,7 +13,8 @@ namespace RMMBY
         public List<string> Modules { get; set; }
         public string SettingsFile { get; set; } = "N/A";
         public string ConfigFile { get; set; } = "N/A";
-        public bool Restart { get; set; } = false;
+        public bool CustomMenu { get; set; } = false;
+        public bool RequiresRestartToUnload { get; set; } = false;
         public int GamebananaID { get; set; } = -1;
         public int GamebananaIndex { get; set; } = 0;
         public string Location { get; private set; }
