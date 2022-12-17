@@ -7,8 +7,6 @@ using System.IO;
 using System.Collections.Generic;
 using MelonLoader;
 using RMMBY.Helpers;
-using System.Diagnostics;
-using System.Windows;
 
 namespace RMMBY
 {
@@ -18,6 +16,10 @@ namespace RMMBY
         private bool up;
         private bool right;
         private bool left;
+        private bool select;
+        private bool selectLock = true;
+        private bool back;
+        private bool backLock = true;
 
         Canvas modmenu;
         private float scaleFactor = 1;
@@ -56,15 +58,49 @@ namespace RMMBY
 
         private void Update()
         {
-            if(currentMenu == -1 && inputHandler.back)
+            if(currentMenu == -1 && back)
                 SceneManager.LoadScene(ListenToLoadMenu.sceneToReturnTo);
 
             if (!modsLoaded) return;
 
+            if (inputHandler.select)
+            {
+                if (!selectLock)
+                {
+                    select = true;
+                    selectLock = true;
+                } else
+                {
+                    select = false;
+                }
+            } else
+            {
+                selectLock = false;
+                select = false;
+            }
+
+            if (inputHandler.back)
+            {
+                if (!backLock)
+                {
+                    back = true;
+                    backLock = true;
+                }
+                else
+                {
+                    back = false;
+                }
+            }
+            else
+            {
+                backLock = false;
+                back = false;
+            }
+
             switch (currentMenu)
             {
                 case -1:
-                    if (inputHandler.back || inputHandler.select)
+                    if (back || select)
                     {
                         SceneManager.LoadScene(ListenToLoadMenu.sceneToReturnTo);
                     }
@@ -259,7 +295,7 @@ namespace RMMBY
 
             SetSelected(buttons[currentButtonSelect]);
 
-            if (inputHandler.back)
+            if (back)
             {
                 if (restartRequired) {
                     Melon<Plugin>.Instance.LoadInfo(restartMessage, 0);
@@ -270,7 +306,7 @@ namespace RMMBY
                 }
             }
 
-            if (inputHandler.select && Metadata[currentButtonSelect].State == MetadataState.Success)
+            if (select && Metadata[currentButtonSelect].State == MetadataState.Success)
             {
                 CreateSettings(Path.Combine(Metadata[currentButtonSelect].Location, Metadata[currentButtonSelect].SettingsFile), Path.Combine(Metadata[currentButtonSelect].Location, Metadata[currentButtonSelect].ConfigFile));
             }
@@ -323,7 +359,7 @@ namespace RMMBY
                 }
             }
 
-            if (inputHandler.back)
+            if (back)
             {
                 List<string> list = new List<string>();
 
@@ -468,8 +504,6 @@ namespace RMMBY
                 currentY -= buttonYDif;
                 currentX += buttonXDif;
             }
-
-            buttonsCreated = true;
         }
 
         private void GetMenus()
@@ -505,7 +539,7 @@ namespace RMMBY
             settingHolder = GameObject.Find("Settings");
             settingPrefab = GameObject.Find("OptionPrefab");
 
-            GameObject[] children = settingHolder.GetComponentsInChildren<GameObject>();
+            GameObject[] children = ObjectFinders.FindAllObjectsWithName("OptionPrefab(Clone)");
             foreach (GameObject child in children)
             {
                 if (child != settingHolder)
@@ -514,13 +548,15 @@ namespace RMMBY
                 }
             }
 
-            currentSettings = new List<int>();
-
-            currentSettings.Add(0);
+            currentSettings = new List<int>
+            {
+                0
+            };
 
             GameObject.Find("SettingsModName").GetComponent<Text>().text = Metadata[currentButtonSelect].Title;
             settingY = settingStart.y;
             settingsList.Clear();
+            settings.Clear();
 
             GameObject gameObject = Instantiate(settingPrefab);
             gameObject.transform.SetParent(settingHolder.transform);
@@ -615,11 +651,13 @@ namespace RMMBY
 
         private void LoadMods()
         {
-            List<Text> texts = new List<Text>();
-            texts.Add(GameObject.Find("ModName").GetComponent<Text>());
-            texts.Add(GameObject.Find("Author").GetComponent<Text>());
-            texts.Add(GameObject.Find("Description").GetComponent<Text>());
-            texts.Add(GameObject.Find("Version").GetComponent<Text>());
+            List<Text> texts = new List<Text>
+            {
+                GameObject.Find("ModName").GetComponent<Text>(),
+                GameObject.Find("Author").GetComponent<Text>(),
+                GameObject.Find("Description").GetComponent<Text>(),
+                GameObject.Find("Version").GetComponent<Text>()
+            };
 
             modText = texts.ToArray();
 
@@ -651,7 +689,7 @@ namespace RMMBY
                             Metadata.Add(MetadataBase.Load<MetadataBase>(text));
                         }
                     }
-                    catch (Exception ex)
+                    catch
                     {
 
                     }
@@ -801,11 +839,13 @@ namespace RMMBY
 
             currentMenu = -1;
 
-            List<Text> texts = new List<Text>();
-            texts.Add(GameObject.Find("ModName").GetComponent<Text>());
-            texts.Add(GameObject.Find("Author").GetComponent<Text>());
-            texts.Add(GameObject.Find("Description").GetComponent<Text>());
-            texts.Add(GameObject.Find("Version").GetComponent<Text>());
+            List<Text> texts = new List<Text>
+            {
+                GameObject.Find("ModName").GetComponent<Text>(),
+                GameObject.Find("Author").GetComponent<Text>(),
+                GameObject.Find("Description").GetComponent<Text>(),
+                GameObject.Find("Version").GetComponent<Text>()
+            };
 
             modText = texts.ToArray();
 
@@ -820,7 +860,6 @@ namespace RMMBY
         private bool error;
 
         private int buttonDir;
-        private bool buttonAltInput;
         private Vector2 buttonStart;
         private float buttonYDif;
         private float buttonXDif;
@@ -847,7 +886,6 @@ namespace RMMBY
         public GameObject settingPrefab;
 
         private bool modsLoaded = false;
-        private bool buttonsCreated;
 
         private int currentButtonSelect = 0;
         private int currentSettingSelect = 0;

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using MelonLoader;
 
@@ -20,64 +19,77 @@ namespace RMMBY.Helpers
 
             string result = "";
 
-            StreamReader r = new StreamReader(dataPath);
-
-            string line;
-            using (r)
+            try
             {
-                do
-                {
-                    //Read a line
-                    line = r.ReadLine();
-                    if (line != null)
-                    {
-                        //Divide line into basic structure
-                        string[] lineData = line.Split(';');
-                        //Check the line type
-                        if (lineData[0] == itemType)
-                        {
-                            result = lineData[1];
+                StreamReader r = new StreamReader(dataPath);
 
-                            break;
+                string line;
+                using (r)
+                {
+                    do
+                    {
+                        //Read a line
+                        line = r.ReadLine();
+                        if (line != null)
+                        {
+                            //Divide line into basic structure
+                            string[] lineData = line.Split(';');
+                            //Check the line type
+                            if (lineData[0] == itemType)
+                            {
+                                result = lineData[1];
+
+                                break;
+                            }
                         }
                     }
+                    while (line != null);
+                    //Stop reading the file
+                    r.Close();
                 }
-                while (line != null);
-                //Stop reading the file
-                r.Close();
-            }
+            } catch { result = "INVALID DATA TYPE"; }
 
-            if (result == "") result = "INVALID DATA TYPE";
             return result;
         }
 
         public static string[] ReadDataAll(string itemType)
         {
+            SetupDataReader();
+
             List<string> list = new List<string>();
 
-            StreamReader r = new StreamReader(dataPath);
-
-            string line;
-            using (r)
+            try
             {
-                do
+                StreamReader r = new StreamReader(dataPath);
+
+                string line;
+                using (r)
                 {
-                    //Read a line
-                    line = r.ReadLine();
-                    if (line != null)
+                    do
                     {
-                        //Divide line into basic structure
-                        string[] lineData = line.Split(';');
-                        //Check the line type
-                        if (lineData[0] == itemType)
+                        //Read a line
+                        line = r.ReadLine();
+                        if (line != null)
                         {
-                            list.Add(lineData[1]);
+                            //Divide line into basic structure
+                            string[] lineData = line.Split(';');
+                            //Check the line type
+                            if (lineData[0] == itemType)
+                            {
+                                list.Add(lineData[1]);
+                            }
                         }
                     }
+                    while (line != null);
+                    //Stop reading the file
+                    r.Close();
                 }
-                while (line != null);
-                //Stop reading the file
-                r.Close();
+            }
+            catch {
+                list = new List<string>
+                {
+                    "INVALID DATA TYPE"
+                };
             }
 
             string[] result = list.ToArray();
@@ -87,40 +99,88 @@ namespace RMMBY.Helpers
 
         public static string[] ReadDataMulti(string itemType)
         {
+            SetupDataReader();
+
             List<string> list = new List<string>();
 
-            StreamReader r = new StreamReader(dataPath);
-
-            string line;
-            using (r)
+            try
             {
-                do
-                {
-                    //Read a line
-                    line = r.ReadLine();
-                    if (line != null)
-                    {
-                        //Divide line into basic structure
-                        string[] lineData = line.Split(';');
-                        //Check the line type
-                        if (lineData[0] == itemType)
-                        {
-                            for (int i = 1; i < lineData.Length; i++)
-                            {
-                                list.Add(lineData[i]);
-                            }
+                StreamReader r = new StreamReader(dataPath);
 
-                            break;
+                string line;
+                using (r)
+                {
+                    do
+                    {
+                        //Read a line
+                        line = r.ReadLine();
+                        if (line != null)
+                        {
+                            //Divide line into basic structure
+                            string[] lineData = line.Split(';');
+                            //Check the line type
+                            if (lineData[0] == itemType)
+                            {
+                                for (int i = 1; i < lineData.Length; i++)
+                                {
+                                    list.Add(lineData[i]);
+                                }
+
+                                break;
+                            }
                         }
                     }
+                    while (line != null);
+                    //Stop reading the file
+                    r.Close();
                 }
-                while (line != null);
-                //Stop reading the file
-                r.Close();
+            } catch {
+                list = new List<string>
+                {
+                    "INVALID DATA TYPE"
+                };
             }
 
             string[] result = list.ToArray();
 
+            return result;
+        }
+
+        public static string[] ReadAllData()
+        {
+            SetupDataReader();
+
+            List<string> list = new List<string>();
+
+            try
+            {
+                StreamReader r = new StreamReader(dataPath);
+
+                string line;
+                using (r)
+                {
+                    do
+                    {
+                        //Read a line
+                        line = r.ReadLine();
+                        if (line != null)
+                        {
+                            list.Add(line);
+                        }
+                    }
+                    while (line != null);
+                    //Stop reading the file
+                    r.Close();
+                }
+            }
+            catch {
+                list = new List<string>
+                {
+                    "INVALID DATA TYPE"
+                };
+            }
+
+            string[] result = list.ToArray();
             return result;
         }
     }
